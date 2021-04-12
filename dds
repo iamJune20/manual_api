@@ -80,7 +80,7 @@ CREATE TABLE public.category (
     category_name character varying(50) NOT NULL,
     category_desc text,
     category_icon text NOT NULL,
-    app_code uuid NOT NULL,
+    manual_code uuid NOT NULL,
     create_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     update_at timestamp with time zone,
     delete_at timestamp with time zone,
