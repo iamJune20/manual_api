@@ -77,7 +77,7 @@ func (r *searchRepository) FindAll(valueSearch string) (model.SearchAll, error) 
 func (r *searchRepository) FindOne(AppCode string, valueSearch string) (*model.SearchOne, error) {
 
 	var searchOne model.SearchOne
-	query5 := `SELECT DISTINCT(content_code) as content_code FROM "search_one" WHERE "search_field" LIKE $1 AND "app_code" = $2`
+	query5 := `SELECT DISTINCT(content_code) as content_code FROM "search_all" WHERE "search_field" LIKE $1 AND "app_code" = $2`
 	var contents content.Contents
 	rows5, err := r.db.Query(query5, "%"+valueSearch+"%", AppCode)
 	if err != nil {

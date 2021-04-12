@@ -1,0 +1,274 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 12.2
+-- Dumped by pg_dump version 12.2
+
+-- Started on 2021-04-12 14:55:34
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 2 (class 3079 OID 16738)
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- TOC entry 2865 (class 0 OID 0)
+-- Dependencies: 2
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
+--
+-- TOC entry 551 (class 1247 OID 16750)
+-- Name: typeenum; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.typeenum AS ENUM (
+    'Yes',
+    'No'
+);
+
+
+ALTER TYPE public.typeenum OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 203 (class 1259 OID 16755)
+-- Name: apps; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.apps (
+    app_code uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    app_name character varying(50) NOT NULL,
+    app_logo character varying(70) DEFAULT 'default.png'::character varying NOT NULL,
+    create_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    update_at timestamp with time zone,
+    delete_at timestamp with time zone,
+    app_publish public.typeenum
+);
+
+
+ALTER TABLE public.apps OWNER TO postgres;
+
+--
+-- TOC entry 205 (class 1259 OID 16773)
+-- Name: category; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.category (
+    category_code uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    category_name character varying(50) NOT NULL,
+    category_desc text,
+    category_icon text NOT NULL,
+    manual_code uuid,
+    create_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    update_at timestamp with time zone,
+    delete_at timestamp with time zone,
+    category_publish public.typeenum
+);
+
+
+ALTER TABLE public.category OWNER TO postgres;
+
+--
+-- TOC entry 206 (class 1259 OID 16783)
+-- Name: content; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.content (
+    content_code uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    content_title character varying(255) NOT NULL,
+    content_desc text NOT NULL,
+    category_code uuid NOT NULL,
+    manual_code uuid NOT NULL,
+    create_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    update_at timestamp with time zone,
+    delete_at timestamp with time zone,
+    content_publish public.typeenum
+);
+
+
+ALTER TABLE public.content OWNER TO postgres;
+
+--
+-- TOC entry 204 (class 1259 OID 16763)
+-- Name: manual; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.manual (
+    manual_code uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    manual_name character varying(50) NOT NULL,
+    manual_desc text NOT NULL,
+    manual_icon text NOT NULL,
+    app_code uuid NOT NULL,
+    create_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    update_at timestamp with time zone,
+    delete_at timestamp with time zone,
+    manual_publish public.typeenum
+);
+
+
+ALTER TABLE public.manual OWNER TO postgres;
+
+--
+-- TOC entry 207 (class 1259 OID 16817)
+-- Name: search_all; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.search_all WITH (security_barrier='false') AS
+ SELECT content.content_title AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM (((public.content
+     JOIN public.category ON ((category.category_code = content.category_code)))
+     JOIN public.manual ON ((category.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL))
+UNION ALL
+ SELECT content.content_desc AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM (((public.content
+     JOIN public.category ON ((category.category_code = content.category_code)))
+     JOIN public.manual ON ((category.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL))
+UNION ALL
+ SELECT content.content_title AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM (((public.content
+     JOIN public.category ON ((category.category_code = content.category_code)))
+     JOIN public.manual ON ((category.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL))
+UNION ALL
+ SELECT content.content_desc AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM (((public.content
+     JOIN public.category ON ((category.category_code = content.category_code)))
+     JOIN public.manual ON ((category.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL))
+UNION ALL
+ SELECT category.category_name AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM (((public.category
+     JOIN public.content ON ((category.category_code = content.category_code)))
+     JOIN public.manual ON ((category.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (category.category_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL) AND (category.delete_at IS NULL))
+UNION ALL
+ SELECT category.category_desc AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM (((public.category
+     JOIN public.content ON ((category.category_code = content.category_code)))
+     JOIN public.manual ON ((category.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (category.category_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL) AND (category.delete_at IS NULL))
+UNION ALL
+ SELECT manual.manual_name AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM ((public.manual
+     JOIN public.content ON ((manual.manual_code = content.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (manual.manual_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL) AND (manual.delete_at IS NULL))
+UNION ALL
+ SELECT manual.manual_desc AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM ((public.manual
+     JOIN public.content ON ((manual.manual_code = content.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (manual.manual_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL) AND (manual.delete_at IS NULL))
+UNION ALL
+ SELECT apps.app_name AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM ((public.content
+     JOIN public.manual ON ((content.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (manual.manual_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL) AND (manual.delete_at IS NULL) AND (apps.app_publish = 'Yes'::public.typeenum) AND (apps.delete_at IS NULL))
+UNION ALL
+ SELECT apps.app_name AS search_field,
+    content.content_code,
+    apps.app_code
+   FROM ((public.content
+     JOIN public.manual ON ((content.manual_code = manual.manual_code)))
+     JOIN public.apps ON ((apps.app_code = manual.app_code)))
+  WHERE ((content.content_publish = 'Yes'::public.typeenum) AND (content.content_publish = 'Yes'::public.typeenum) AND (content.delete_at IS NULL) AND (content.delete_at IS NULL) AND (apps.app_publish = 'Yes'::public.typeenum) AND (apps.delete_at IS NULL));
+
+
+ALTER TABLE public.search_all OWNER TO postgres;
+
+--
+-- TOC entry 2729 (class 2606 OID 16762)
+-- Name: apps apps_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.apps
+    ADD CONSTRAINT apps_pkey PRIMARY KEY (app_code);
+
+
+--
+-- TOC entry 2727 (class 1259 OID 16813)
+-- Name: apps_app_code_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX apps_app_code_idx ON public.apps USING btree (app_code);
+
+
+--
+-- TOC entry 2731 (class 1259 OID 16815)
+-- Name: category_category_code_app_code_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX category_category_code_app_code_idx ON public.category USING btree (category_code, manual_code);
+
+
+--
+-- TOC entry 2732 (class 1259 OID 16816)
+-- Name: content_category_code_manual_code_content_code_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX content_category_code_manual_code_content_code_idx ON public.content USING btree (category_code, manual_code, content_code);
+
+
+--
+-- TOC entry 2730 (class 1259 OID 16814)
+-- Name: manual_manual_code_app_code_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX manual_manual_code_app_code_idx ON public.manual USING btree (manual_code, app_code);
+
+
+-- Completed on 2021-04-12 14:55:35
+
+--
+-- PostgreSQL database dump complete
+--
+
