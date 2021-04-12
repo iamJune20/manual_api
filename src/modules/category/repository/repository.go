@@ -9,6 +9,6 @@ type CategoryRepository interface {
 	Update(string, *model.Category) (string, error)
 	Delete(string) (string, error)
 	FindByID(string) (*model.Category, error)
-	FindByAppCode(string) (*model.Categories, error)
+	FindByManualCode(string) (*model.Categories, error)
 	FindAll() (model.Categories, error)
 }

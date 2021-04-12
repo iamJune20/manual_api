@@ -51,11 +51,11 @@ func Router() *mux.Router {
 	api.HandleFunc("/app/{code}", controllers.DeleteApp).Methods("DELETE")
 
 	router.HandleFunc("/public/categories", controllers.GetCategories).Methods("GET")
-	router.HandleFunc("/public/categoriesByApp/{code}", controllers.GetCategoriesByAppCode).Methods("GET")
+	router.HandleFunc("/public/categoriesByManual/{code}", controllers.GetCategoriesByManualCode).Methods("GET")
 	router.HandleFunc("/public/category/{code}", controllers.GetCategory).Methods("GET")
 
 	// with auth
-	api.HandleFunc("/category/{app_code}", controllers.InsertCategory).Methods("POST")
+	api.HandleFunc("/category/{manual_code}", controllers.InsertCategory).Methods("POST")
 	api.HandleFunc("/category/{code}", controllers.UpdateCategory).Methods("PUT")
 	api.HandleFunc("/category/{code}", controllers.DeleteCategory).Methods("DELETE")
 

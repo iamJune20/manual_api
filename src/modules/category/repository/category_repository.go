@@ -32,7 +32,7 @@ func (r *categoryRepository) FindAll() (model.Categories, error) {
 	for rows.Next() {
 		var category model.Category
 
-		err = rows.Scan(&category.Code, &category.Name, &category.Desc, &category.Icon, &category.AppCode, &category.CreatedAt, &category.UpdatedAt, &category.DeleteAt, &category.Publish)
+		err = rows.Scan(&category.Code, &category.Name, &category.Desc, &category.Icon, &category.ManualCode, &category.CreatedAt, &category.UpdatedAt, &category.DeleteAt, &category.Publish)
 
 		if err != nil {
 			return nil, err
@@ -43,13 +43,13 @@ func (r *categoryRepository) FindAll() (model.Categories, error) {
 
 	return categories, nil
 }
-func (r *categoryRepository) FindByAppCode(app_code string) (model.Categories, error) {
+func (r *categoryRepository) FindByManualCode(manual_code string) (model.Categories, error) {
 
-	query := `SELECT * FROM "category" WHERE "category_publish" = 'Yes' AND "delete_at" IS NULL AND "app_code" = $1`
+	query := `SELECT * FROM "category" WHERE "category_publish" = 'Yes' AND "delete_at" IS NULL AND "manual_code" = $1`
 
 	var categories model.Categories
 
-	rows, err := r.db.Query(query, app_code)
+	rows, err := r.db.Query(query, manual_code)
 
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (r *categoryRepository) FindByAppCode(app_code string) (model.Categories, e
 	for rows.Next() {
 		var category model.Category
 
-		err = rows.Scan(&category.Code, &category.Name, &category.Desc, &category.Icon, &category.AppCode, &category.CreatedAt, &category.UpdatedAt, &category.DeleteAt, &category.Publish)
+		err = rows.Scan(&category.Code, &category.Name, &category.Desc, &category.Icon, &category.ManualCode, &category.CreatedAt, &category.UpdatedAt, &category.DeleteAt, &category.Publish)
 
 		if err != nil {
 			return nil, err
@@ -85,7 +85,7 @@ func (r *categoryRepository) FindByID(category_code string) (*model.Category, er
 
 	defer statement.Close()
 
-	err = statement.QueryRow(category_code).Scan(&category.Code, &category.Name, &category.Desc, &category.Icon, &category.AppCode, &category.CreatedAt, &category.UpdatedAt, &category.DeleteAt, &category.Publish)
+	err = statement.QueryRow(category_code).Scan(&category.Code, &category.Name, &category.Desc, &category.Icon, &category.ManualCode, &category.CreatedAt, &category.UpdatedAt, &category.DeleteAt, &category.Publish)
 
 	if err != nil {
 		return nil, err
@@ -96,10 +96,10 @@ func (r *categoryRepository) FindByID(category_code string) (*model.Category, er
 
 func (r *categoryRepository) Save(category *model.Category) (string, error) {
 
-	query := `INSERT INTO category (category_name, category_desc,category_icon,app_code,create_at,update_at, category_publish) VALUES ($1, $2, $3, $4, $5, $6,'Yes') RETURNING category_code`
+	query := `INSERT INTO category (category_name, category_desc,category_icon,manual_code,create_at,update_at, category_publish) VALUES ($1, $2, $3, $4, $5, $6,'Yes') RETURNING category_code`
 
 	var Code string
-	err := r.db.QueryRow(query, category.Name, category.Desc, category.Icon, category.AppCode, category.CreatedAt, category.UpdatedAt).Scan(&Code)
+	err := r.db.QueryRow(query, category.Name, category.Desc, category.Icon, category.ManualCode, category.CreatedAt, category.UpdatedAt).Scan(&Code)
 	// fmt.Printf("Error : %v", err)
 	if err != nil {
 		return "Data gagal disimpan", err
@@ -109,7 +109,7 @@ func (r *categoryRepository) Save(category *model.Category) (string, error) {
 }
 
 func (r *categoryRepository) Update(category_code string, category *model.Category) (string, error) {
-	query := `UPDATE category SET category_name=$1, category_desc=$2, category_icon=$3, app_code=$4, update_at=$5 WHERE category_code=$6 AND "category_publish" = 'Yes' AND "delete_at" IS NULL`
+	query := `UPDATE category SET category_name=$1, category_desc=$2, category_icon=$3, manual_code=$4, update_at=$5 WHERE category_code=$6 AND "category_publish" = 'Yes' AND "delete_at" IS NULL`
 
 	statement, err := r.db.Prepare(query)
 
@@ -119,7 +119,7 @@ func (r *categoryRepository) Update(category_code string, category *model.Catego
 
 	defer statement.Close()
 
-	_, err = statement.Exec(category.Name, category.Desc, category.Icon, category.AppCode, category.UpdatedAt, category_code)
+	_, err = statement.Exec(category.Name, category.Desc, category.Icon, category.ManualCode, category.UpdatedAt, category_code)
 
 	if err != nil {
 		return "Data gagal di ubah", err

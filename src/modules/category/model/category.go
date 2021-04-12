@@ -7,15 +7,15 @@ import (
 )
 
 type Category struct {
-	Code      string
-	Name      string
-	Desc      string
-	Icon      string
-	AppCode   string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeleteAt  alias.NullTime
-	Publish   string
+	Code       string
+	Name       string
+	Desc       string
+	Icon       string
+	ManualCode string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeleteAt   alias.NullTime
+	Publish    string
 }
 
 type Categories []Category

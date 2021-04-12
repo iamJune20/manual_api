@@ -8,8 +8,8 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/gorilla/mux"
 	"github.com/iamJune20/dds/config"
-	appRe "github.com/iamJune20/dds/src/modules/app/repository"
 	"github.com/iamJune20/dds/src/modules/category/repository"
+	appRe "github.com/iamJune20/dds/src/modules/manual/repository"
 
 	"github.com/iamJune20/dds/src/modules/category/model"
 	_ "github.com/lib/pq"
@@ -73,7 +73,7 @@ func GetCategory(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetCategoriesByAppCode(w http.ResponseWriter, r *http.Request) {
+func GetCategoriesByManualCode(w http.ResponseWriter, r *http.Request) {
 	db := config.CreateConnection()
 	categoryRepository := repository.NewCategoryRepository(db)
 
@@ -81,7 +81,7 @@ func GetCategoriesByAppCode(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 
-	out, err := categoryRepository.FindByAppCode(params["code"])
+	out, err := categoryRepository.FindByManualCode(params["code"])
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -136,8 +136,8 @@ func InsertCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	appRepository := appRe.NewAppRepository(db)
-	app, err := appRepository.FindByID(params["app_code"])
+	appRepository := appRe.NewManualRepository(db)
+	app, err := appRepository.FindByID(params["manual_code"])
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -155,7 +155,7 @@ func InsertCategory(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		} else {
-			category.AppCode = params["app_code"]
+			category.ManualCode = params["manual_code"]
 		}
 	}
 	// fmt.Printf("AppCode : %v", category.AppCode)
@@ -213,17 +213,17 @@ func UpdateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category.AppCode = r.FormValue("AppCode")
-	errAppCode := validation.Validate(category.AppCode,
+	category.ManualCode = r.FormValue("ManualCode")
+	errAppCode := validation.Validate(category.ManualCode,
 		validation.Required,
 	)
 	if errAppCode != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		ReturnError(w, 400, "AppCode harus diisi")
+		ReturnError(w, 400, "ManualCode harus diisi")
 		return
 	}
-	appRepository := appRe.NewAppRepository(db)
-	app, err := appRepository.FindByID(category.AppCode)
+	appRepository := appRe.NewManualRepository(db)
+	app, err := appRepository.FindByID(category.ManualCode)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
